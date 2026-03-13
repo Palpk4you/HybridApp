@@ -5,6 +5,13 @@
 <div class="text-center">
     <p>Authenticated: @User.Identity.IsAuthenticated</p>
     <p>Username: @User.Identity.Name</p>
+    <p>Roles:</p>
+    <ul>
+        @foreach (var role in User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role))
+        {
+            <li>@role.Value</li>
+        }
+    </ul>
 
 
     <h1 class="display-4">Welcome</h1>

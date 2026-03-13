@@ -1,3 +1,5 @@
+using HybridApp.DTOs;
+
 public interface IRoleService
 {
     Task<RoleDto> GetRoleByIdAsync(string id);

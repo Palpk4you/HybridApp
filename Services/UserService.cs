@@ -1,4 +1,5 @@
 using AutoMapper;
+using HybridApp.DTOs;
 
 public class UserService : IUserService
 {

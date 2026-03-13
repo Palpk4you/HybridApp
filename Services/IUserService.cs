@@ -1,3 +1,6 @@
+
+using HybridApp.DTOs;
+
 public interface IUserService
 {
     Task<UserDto> GetUserByIdAsync(string id);
