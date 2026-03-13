@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using HybridApp.DTOs;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -6,7 +7,9 @@ using System.Text;
 
 public interface IJwtService
 {
-    string GenerateToken(string userId, string email, IList<string> roles);
+    JwtResult GenerateToken(User user, IList<string> roles);
+
+
 }
 
 public class JwtService : IJwtService
@@ -18,13 +21,15 @@ public class JwtService : IJwtService
         _config = config;
     }
 
-    public string GenerateToken(string userId, string email, IList<string> roles)
+    public JwtResult GenerateToken(User user, IList<string> roles)
     {
+        var jti = Guid.NewGuid().ToString();
+
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, userId),
-            new Claim(JwtRegisteredClaimNames.Email, email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(JwtRegisteredClaimNames.Jti, jti)
         };
 
         foreach (var role in roles)
@@ -39,9 +44,14 @@ public class JwtService : IJwtService
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(2),
-            signingCredentials: creds);
+            expires: DateTime.UtcNow.AddMinutes(30),
+            signingCredentials: creds
+        );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new JwtResult
+        {
+            Token = new JwtSecurityTokenHandler().WriteToken(token),
+            Jti = jti
+        };
     }
 }

@@ -1,4 +1,5 @@
-﻿    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using HybridApp.Data.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
     using System.Data;
 
@@ -10,6 +11,9 @@
 
         //public DbSet<User> Users { get; set; }
         //public DbSet<Role> Roles { get; set; }
+
+        public DbSet<UserToken> UserTokens { get; set; }
+
 
     }
 }
