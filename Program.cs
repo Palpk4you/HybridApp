@@ -111,7 +111,7 @@ builder.Host.ConfigureContainer<ContainerBuilder>(container =>
 });
 
 // Email
-builder.Services.AddTransient<IEmailSender, HybridApp.Services.EmailSender>();
+//builder.Services.AddTransient<IEmailSender, HybridApp.Services.EmailSender>(); //Now using EmailService with MailKit and register view Ioc Continer
 
 var app = builder.Build();
 
