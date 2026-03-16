@@ -56,6 +56,21 @@ namespace HybridApp.Api.Controllers
             {
                 await _userManager.AddToRoleAsync(user, "Guest");
             }
+            // Create profile entry
+
+            var profile = new UserProfile
+            {
+                UserId = user.Id,
+                FullName = model.FullName,
+                PhoneNumber = model.PhoneNumber,
+                DateOfBirth = model.DateOfBirth ?? DateTime.MinValue,
+                Address = model.Address
+            };
+
+            _context.UserProfiles.Add(profile);
+            await _context.SaveChangesAsync();
+
+
 
             // Optionally send email confirmation
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);

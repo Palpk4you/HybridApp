@@ -13,10 +13,19 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
         //public DbSet<Role> Roles { get; set; }
 
         public DbSet<UserToken> UserTokens { get; set; }
+        public DbSet<UserProfile> UserProfiles { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<UserProfile>()
+           .HasOne(up => up.User)
+           .WithOne()
+           .HasForeignKey<UserProfile>(up => up.UserId);
+
 
             builder.Entity<Role>().HasData(
                 new Role

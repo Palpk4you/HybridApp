@@ -2,6 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
+using HybridApp.Data;
+using HybridApp.Data.Entities;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,14 +21,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
 
 namespace HybridApp.Areas.Identity.Pages.Account
 {
@@ -30,6 +33,7 @@ namespace HybridApp.Areas.Identity.Pages.Account
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailService _emailService;
         private readonly IWebHostEnvironment _env;
+        private readonly AppDbContext _context;
 
 
         public RegisterModel(
@@ -38,7 +42,7 @@ namespace HybridApp.Areas.Identity.Pages.Account
             SignInManager<User> signInManager,
             ILogger<RegisterModel> logger,
             IEmailService emailService,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env, AppDbContext context)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -47,6 +51,8 @@ namespace HybridApp.Areas.Identity.Pages.Account
             _logger = logger;
             _emailService = emailService;
             _env = env;
+            _context = context;
+
         }
 
         /// <summary>
@@ -101,6 +107,14 @@ namespace HybridApp.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Required]
+            public string FullName { get; set; }
+
+            public string PhoneNumber { get; set; }
+            public DateTime DateOfBirth { get; set; }
+            public string Address { get; set; }
+
         }
 
 
@@ -180,6 +194,22 @@ namespace HybridApp.Areas.Identity.Pages.Account
 
                     // Assign default role
                     await _userManager.AddToRoleAsync(user, "Guest");
+                    // Create profile entry
+                    var profile = new UserProfile
+                    {
+                        UserId = user.Id,
+                        FullName = Input.FullName,
+                        PhoneNumber = Input.PhoneNumber,
+                        DateOfBirth = Input.DateOfBirth,
+                        Address = Input.Address
+                    };
+
+                    _context.UserProfiles.Add(profile);
+                    await _context.SaveChangesAsync();
+
+
+
+
 
 
                     // 🔹 Generate email confirmation token
