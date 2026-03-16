@@ -8,5 +8,5 @@ public interface IRoleRepository
     Task<IdentityResult> UpdateAsync(Role role);
 
     Task DeleteAsync(string id);
-    
+    Task<Role?>GetByNameAsync(string name);
 }
