@@ -177,6 +177,11 @@ namespace HybridApp.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
+
+                    // Assign default role
+                    await _userManager.AddToRoleAsync(user, "Guest");
+
+
                     // 🔹 Generate email confirmation token
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
