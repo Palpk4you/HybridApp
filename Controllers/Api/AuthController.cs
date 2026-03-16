@@ -45,7 +45,22 @@ namespace HybridApp.Api.Controllers
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
-            return Ok("User registered successfully");
+            // Assign default role "Guest"
+            if (!await _userManager.IsInRoleAsync(user, "Guest"))
+            {
+                await _userManager.AddToRoleAsync(user, "Guest");
+            }
+
+            // Optionally send email confirmation
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var confirmationLink = Url.Action("ConfirmEmail", "Auth",
+                new { userId = user.Id, token }, Request.Scheme);
+
+            _logger.LogInformation("Email confirmation link: {Link}", confirmationLink);
+            // TODO: send via email service
+
+            return Ok("User registered successfully with Guest role");
+
         }
 
         [HttpPost("login")]
@@ -103,5 +118,46 @@ namespace HybridApp.Api.Controllers
             }
             return Ok("Logged out successfully");
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
+        {
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user == null) return BadRequest("User not found");
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var resetLink = Url.Action("ResetPassword", "Auth",
+                new { userId = user.Id, token }, Request.Scheme);
+
+            _logger.LogInformation("Password reset link: {Link}", resetLink);
+            // TODO: send via email service
+
+            return Ok("Password reset link generated");
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
+        {
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user == null) return BadRequest("User not found");
+
+            var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
+            if (!result.Succeeded) return BadRequest(result.Errors);
+
+            return Ok("Password reset successful");
+        }
+
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return BadRequest("User not found");
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded) return BadRequest(result.Errors);
+
+            return Ok("Email confirmed successfully");
+        }
+
     }
 }
