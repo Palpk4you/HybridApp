@@ -5,6 +5,9 @@ using HybridApp.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Encodings.Web;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
+
 
 namespace HybridApp.Api.Controllers
 {
@@ -19,13 +22,15 @@ namespace HybridApp.Api.Controllers
         private readonly AppDbContext _context;
         private readonly ICacheService _cache;
         private readonly ILogger<AuthController> _logger;
+        private readonly IWebHostEnvironment _env;
+        private readonly IEmailService _emailService;
 
         public AuthController(ILogger<AuthController> logger,
                                 UserManager<User> userManager,
                               SignInManager<User> signInManager,
                               IJwtService jwtService,
                               AppDbContext context,
-                              ICacheService cache)
+                              ICacheService cache, IWebHostEnvironment env, IEmailService emailService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -33,7 +38,8 @@ namespace HybridApp.Api.Controllers
             _context = context;
             _cache = cache;
             _logger = logger;
-
+            _env = env;
+            _emailService = emailService;   
         }
 
         [HttpPost("register")]
@@ -58,6 +64,17 @@ namespace HybridApp.Api.Controllers
 
             _logger.LogInformation("Email confirmation link: {Link}", confirmationLink);
             // TODO: send via email service
+
+            // 🔹 Load HTML template
+            var templatePath = Path.Combine(_env.ContentRootPath, "Templates", "ConfirmEmail.html");
+            var template = await System.IO.File.ReadAllTextAsync(templatePath);
+
+            // 🔹 Replace placeholders
+            template = template.Replace("{{FirstName}}", user.UserName)
+                               .Replace("{{ConfirmationLink}}", confirmationLink);
+
+            // 🔹 Send email
+            await _emailService.SendEmailAsync(user.Email, "Confirm your email", template);
 
             return Ok("User registered successfully with Guest role");
 
@@ -129,8 +146,15 @@ namespace HybridApp.Api.Controllers
             var resetLink = Url.Action("ResetPassword", "Auth",
                 new { userId = user.Id, token }, Request.Scheme);
 
+        
+
             _logger.LogInformation("Password reset link: {Link}", resetLink);
             // TODO: send via email service
+            await _emailService.SendEmailAsync(
+                    dto.Email,
+                    "Reset Password",
+                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(resetLink)}'>clicking here</a>.");
+
 
             return Ok("Password reset link generated");
         }
