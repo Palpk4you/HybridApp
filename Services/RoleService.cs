@@ -46,11 +46,19 @@ public class RoleService : IRoleService
 
     }
 
-    public async Task UpdateRoleAsync(RoleDto roleDto)
+    public async Task<IdentityResult> UpdateRoleAsync(RoleDto dto)
     {
-        var role = _mapper.Map<Role>(roleDto);
-        await _roleRepository.UpdateAsync(role);
+        var role = await _roleRepository.GetByIdAsync(dto.Id);
+        if (role == null)
+            return IdentityResult.Failed(new IdentityError { Description = "Role not found" });
+
+        // AutoMapper maps dto → role
+        _mapper.Map(dto, role);
+
+        return await _roleRepository.UpdateAsync(role);
+
     }
+
 
     public async Task DeleteRoleAsync(string id) =>
         await _roleRepository.DeleteAsync(id);

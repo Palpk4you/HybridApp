@@ -1,18 +1,17 @@
 using HybridApp.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
 
 public class RoleRepository : IRoleRepository
 {
     private readonly AppDbContext _context;
+    private readonly RoleManager<Role> _roleManager;
 
-    public RoleRepository(AppDbContext context)
+    public RoleRepository(AppDbContext context, RoleManager<Role> roleManager)
     {
         _context = context;
+        _roleManager = roleManager;
     }
-
-    public async Task<Role?> GetByIdAsync(string id) =>
-        await _context.Roles.FindAsync(id);
 
     public async Task<IEnumerable<Role>> GetAllAsync() =>
         await _context.Roles.ToListAsync();
@@ -23,10 +22,15 @@ public class RoleRepository : IRoleRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(Role role)
+    public async Task<IdentityResult> UpdateAsync(Role role)
     {
-        _context.Roles.Update(role);
-        await _context.SaveChangesAsync();
+        return await _roleManager.UpdateAsync(role); // ✅ handles ConcurrencyStamp
+    }
+
+
+    public async Task<Role?> GetByIdAsync(string id)
+    {
+        return await _roleManager.FindByIdAsync(id);
     }
 
     public async Task DeleteAsync(string id)

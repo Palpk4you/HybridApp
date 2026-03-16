@@ -85,6 +85,7 @@ namespace HybridApp.Api.Controllers
         }
 
 
+
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] LogoutDto dto)
         {

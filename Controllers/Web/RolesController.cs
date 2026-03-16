@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
-using HybridApp.DTOs;
+using HybridApp.Api.Controllers;
 using HybridApp.Data; // for Role entity
+using HybridApp.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+
 
 namespace HybridApp.Controllers.Web
 {
@@ -11,11 +14,13 @@ namespace HybridApp.Controllers.Web
     {
         private readonly IRoleService _roleService;
         private readonly IMapper _mapper;
+        private readonly ILogger<AuthController> _logger;
 
-        public RolesController(IRoleService roleService, IMapper mapper)
+        public RolesController(ILogger<AuthController> logger, IRoleService roleService, IMapper mapper)
         {
             _roleService = roleService;
             _mapper = mapper;
+            _logger = logger;
         }
 
         // GET: Roles
@@ -32,8 +37,8 @@ namespace HybridApp.Controllers.Web
         {
             var role = await _roleService.GetRoleByIdAsync(id);
             if (role == null) return NotFound();
-
             var dto = _mapper.Map<RoleDto>(role);
+            _logger.LogInformation("Role Dto detail", dto);
             return View(dto);
         }
 
@@ -59,15 +64,20 @@ namespace HybridApp.Controllers.Web
         {
             if (!ModelState.IsValid) return View(dto);
 
-            var role = await _roleService.GetRoleByIdAsync(dto.Id);
-            if (role == null) return NotFound();
-
-            // Map updated fields from DTO back into entity
-            _mapper.Map(dto, role);
-            await _roleService.UpdateRoleAsync(role);
+            var result = await _roleService.UpdateRoleAsync(dto);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+                return View(dto);
+            }
 
             return RedirectToAction(nameof(Index));
         }
+
+
 
         // POST: Roles/Delete/5
         [HttpPost]

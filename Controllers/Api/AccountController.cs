@@ -22,19 +22,19 @@ namespace HybridApp.Api.Controllers
             _context = context;
         }
 
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout([FromBody] LogoutDto dto)
-        {
-            var token = await _context.UserTokens.FirstOrDefaultAsync(t => t.Jti == dto.Jti);
-            if (token != null)
-            {
-                token.IsRevoked = true;
-                await _context.SaveChangesAsync();
-                await _cache.SetAsync(dto.Jti, "revoked", TimeSpan.FromMinutes(30));
-            }
+        //[HttpPost("logout")]  // available in Auth already 
+        //public async Task<IActionResult> Logout([FromBody] LogoutDto dto)
+        //{
+        //    var token = await _context.UserTokens.FirstOrDefaultAsync(t => t.Jti == dto.Jti);
+        //    if (token != null)
+        //    {
+        //        token.IsRevoked = true;
+        //        await _context.SaveChangesAsync();
+        //        await _cache.SetAsync(dto.Jti, "revoked", TimeSpan.FromMinutes(30));
+        //    }
 
-            return Ok("Logged out successfully");
-        }
+        //    return Ok("Logged out successfully");
+        //}
     }
 
 }

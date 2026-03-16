@@ -1,5 +1,6 @@
 using AutoMapper;
 using HybridApp.DTOs;
+using System.Data;
 
 
 public class MappingProfile : Profile
@@ -9,11 +10,12 @@ public class MappingProfile : Profile
         CreateMap<User, UserDto>();
         CreateMap<UserDto, User>();
 
-        // Map Role entity to RoleDto
+        // Entity → DTO
         CreateMap<Role, RoleDto>();
 
-        // If you need reverse mapping
+        // DTO → Entity
         CreateMap<RoleDto, Role>();
+
 
     }
 }

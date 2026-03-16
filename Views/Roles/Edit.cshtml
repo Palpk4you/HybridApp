@@ -12,6 +12,9 @@
     <div class="form-group">
         <label for="Name">Role Name</label>
         <input type="text" name="Name" value="@Model.Name" class="form-control" required />
+
+        <label for="Description">Description</label>
+        <input type="text" name="Description" value="@Model.Description" class="form-control" required />
     </div>
     <button type="submit" class="btn btn-primary mt-2">Save Changes</button>
     <a asp-action="Index" class="btn btn-secondary mt-2">Cancel</a>

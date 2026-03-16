@@ -1,6 +1,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using HybridApp.Data;
+using HybridApp.Extensions;
 using HybridApp.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -55,50 +56,50 @@ var jwtKey = builder.Configuration["Jwt:Key"];
 if (string.IsNullOrEmpty(jwtKey))
     throw new InvalidOperationException("JWT Key is missing in configuration.");
 
-builder.Services.AddAuthentication() // don’t override Identity’s cookie scheme
-    .AddJwtBearer("JwtBearer", options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-        };
+//builder.Services.AddAuthentication() // don’t override Identity’s cookie scheme
+//    .AddJwtBearer("JwtBearer", options =>
+//    {
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuer = true,
+//            ValidateAudience = true,
+//            ValidateLifetime = true,
+//            ValidateIssuerSigningKey = true,
+//            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+//            ValidAudience = builder.Configuration["Jwt:Audience"],
+//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+//        };
 
-        options.Events = new JwtBearerEvents
-        {
-            OnTokenValidated = async context =>
-            {
-                var cache = context.HttpContext.RequestServices.GetRequiredService<ICacheService>();
-                var db = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
-                var jti = context.Principal.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
+//        options.Events = new JwtBearerEvents
+//        {
+//            OnTokenValidated = async context =>
+//            {
+//                var cache = context.HttpContext.RequestServices.GetRequiredService<ICacheService>();
+//                var db = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
+//                var jti = context.Principal.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
 
-                var cached = await cache.GetAsync(jti);
-                if (cached == "revoked")
-                {
-                    context.Fail("Token revoked");
-                    return;
-                }
+//                var cached = await cache.GetAsync(jti);
+//                if (cached == "revoked")
+//                {
+//                    context.Fail("Token revoked");
+//                    return;
+//                }
 
-                if (cached == null)
-                {
-                    var tokenInDb = await db.UserTokens.FirstOrDefaultAsync(t => t.Jti == jti && !t.IsRevoked);
-                    if (tokenInDb == null)
-                    {
-                        context.Fail("Token not found");
-                        return;
-                    }
+//                if (cached == null)
+//                {
+//                    var tokenInDb = await db.UserTokens.FirstOrDefaultAsync(t => t.Jti == jti && !t.IsRevoked);
+//                    if (tokenInDb == null)
+//                    {
+//                        context.Fail("Token not found");
+//                        return;
+//                    }
 
-                    await cache.SetAsync(jti, "active", TimeSpan.FromMinutes(30));
-                }
-            }
-        };
-    });
-
+//                    await cache.SetAsync(jti, "active", TimeSpan.FromMinutes(30));
+//                }
+//            }
+//        };
+//    });
+builder.Services.AddJwtAuthentication(builder.Configuration);
 // AutoMapper
 builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
 
