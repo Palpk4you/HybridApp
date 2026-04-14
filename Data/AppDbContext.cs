@@ -15,8 +15,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
         public DbSet<UserToken> UserTokens { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
 
-
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
