@@ -18,6 +18,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+// CORS for frontend (adjust origin as needed)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 // Serilog logging
 var logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -127,6 +139,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Apply CORS only for APIs
+app.UseCors("FrontendPolicy");
 
 // ✅ Correct order: Authentication first, then Authorization
 app.UseAuthentication();
