@@ -42,6 +42,7 @@ jobs:
       uses: azure/webapps-deploy@v3
       with:
         app-name: 'StagingHybridApp' # Replace with your staging app name
+        slot-name: 'production'      # Crucial fix: explicitly targets the main app, bypassing slots
         images: '${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}'
 
   # STAGE 3: Deploy Container to Production (Requires Manual Click)
@@ -60,4 +61,5 @@ jobs:
       uses: azure/webapps-deploy@v3
       with:
         app-name: 'HybridApp' # Replace with your production app name
+        slot-name: 'production'      # Crucial fix: explicitly targets the main app, bypassing slots
         images: '${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}'
