@@ -37,12 +37,15 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    # FIXED: Cleaned parameters completely prevent the slot mechanism from triggering
+    # FIXED: Direct Azure CLI command forces container assignment with NO slots
     - name: Deploy Container to Azure Staging
-      uses: azure/webapps-deploy@v3
+      uses: azure/cli@v2
       with:
-        app-name: 'StagingHybridApp'
-        images: '${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}'
+        inlineScript: |
+          az webapp config container set \
+            --name 'staginghybridapp' \
+            --resource-group 'learning-dotnet-rg' \
+            --container-image-name '${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}'
 
   # STAGE 3: Deploy Container to Production (Requires Manual Click)
   deploy-to-production:
@@ -55,9 +58,13 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    # FIXED: Cleaned parameters for Production
+    # FIXED: Direct Azure CLI command for Production
     - name: Deploy Container to Azure Production
-      uses: azure/webapps-deploy@v3
+      uses: azure/cli@v2
       with:
-        app-name: 'HybridApp'
-        images: '${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}'
+        inlineScript: |
+          az webapp config container set \
+            --name 'hybridapp' \
+            --resource-group 'learning-dotnet-rg' \
+            --container-image-name '${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}'
+
