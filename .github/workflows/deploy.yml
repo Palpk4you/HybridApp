@@ -41,7 +41,7 @@ jobs:
     - name: Deploy Container to Azure Staging
       uses: azure/webapps-deploy@v3
       with:
-        app-name: 'staginghybridapp'
+        app-name: 'StagingHybridApp'
         images: '${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}'
 
   # STAGE 3: Deploy Container to Production (Requires Manual Click)
@@ -59,6 +59,6 @@ jobs:
     - name: Deploy Container to Azure Production
       uses: azure/webapps-deploy@v3
       with:
-        app-name: 'your-production-app-name' # Replace with production app name
+        app-name: 'HybridApp' # Replace with production app name
         images: '${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}'
 
