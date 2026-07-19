@@ -27,7 +27,7 @@ jobs:
         docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }} .
         docker push ${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}
 
-   # STAGE 2: Deploy Container to Staging Automatically
+     # STAGE 2: Deploy Container to Staging Automatically
   deploy-to-staging:
     runs-on: ubuntu-latest
     needs: build-and-push-docker
@@ -37,11 +37,11 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    # FIXED: Uses the dedicated container deployment action
+    # FIXED: Uses v3 with no slot configurations to handle containers cleanly
     - name: Deploy Container to Azure Staging
-      uses: azure/webapps-container-deploy@v1
+      uses: azure/webapps-deploy@v3
       with:
-        app-name: 'StagingHybridApp'
+        app-name: 'staginghybridapp'
         images: '${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}'
 
   # STAGE 3: Deploy Container to Production (Requires Manual Click)
@@ -55,10 +55,10 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    # FIXED: Uses the dedicated container deployment action
+    # FIXED: Uses v3 with no slot configurations for production
     - name: Deploy Container to Azure Production
-      uses: azure/webapps-container-deploy@v1
+      uses: azure/webapps-deploy@v3
       with:
-        app-name: 'HybridApp' # Replace with production app name
+        app-name: 'your-production-app-name' # Replace with production app name
         images: '${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}'
 
