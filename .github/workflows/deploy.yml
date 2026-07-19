@@ -43,7 +43,7 @@ jobs:
       with:
         inlineScript: |
           az webapp config container set \
-            --name 'staginghybridapp' \
+            --name 'StagingHybridApp' \
             --resource-group 'learning-dotnet-rg' \
             --container-image-name '${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}'
 
@@ -64,7 +64,7 @@ jobs:
       with:
         inlineScript: |
           az webapp config container set \
-            --name 'hybridapp' \
+            --name 'HybridApp' \
             --resource-group 'learning-dotnet-rg' \
             --container-image-name '${{ secrets.ACR_LOGIN_SERVER }}/dotnetapp:${{ github.sha }}'
 
